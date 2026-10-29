@@ -1,0 +1,66 @@
+
+# Install packages (run once)
+install.packages(c("readr", "dplyr", "ggplot2", "here"))
+
+# Load packages
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(here)
+
+# Import CSV file
+mydata <- read_csv(here("data", "enzyme_data.csv"))
+
+# Check dataset
+head(mydata)
+str(mydata)
+names(mydata)
+dim(mydata)
+summary(mydata)
+
+#If your dataset is in Excel format (.xlsx) instead:
+
+
+install.packages("readxl")
+library(readxl)
+
+mydata <- read_excel(
+  here::here("data", "enzyme_data.xlsx")
+)
+
+View(mydata)
+
+
+library(dplyr)
+library(ggplot2)
+
+# Calculate average enzyme activity
+enzyme_summary <- mydata %>%
+  group_by(YEAR, warming.corrected) %>%
+  summarise(
+    Mean_BG = mean(BG, na.rm = TRUE),
+    Mean_NAG = mean(NAG, na.rm = TRUE),
+    Mean_PHOS = mean(PHOS, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(enzyme_summary)
+
+# Create figure
+ggplot(
+  enzyme_summary,
+  aes(
+    x = factor(YEAR),
+    y = Mean_BG,
+    color = warming.corrected,
+    group = warming.corrected
+  )
+) +
+  geom_point(size = 3) +
+  geom_line(linewidth = 1) +
+  labs(
+    x = "Year",
+    y = "Mean BG activity",
+    color = "Warming"
+  ) +
+  theme_classic()
